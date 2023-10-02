@@ -2,9 +2,7 @@
 package main
 
 import (
-	"juego-pollo/scenes"
-
-	"fyne.io/fyne/v2/app"
+    "juego-pollo/scenes"  
 )
 
 const (
@@ -15,9 +13,6 @@ const (
 )
 
 func main() {
-    myapp:= app.New()
-    mywindow:= myapp.NewWindow()
-    
-    menuScene := scenes.NewMenuScene()
-    menuScene.Start()
+    gameScene := scenes.NewGameScene()
+    gameScene.Start()
 }

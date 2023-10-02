@@ -1,16 +1,17 @@
-// scenes/game_scene.go
+
 package scenes
 
 import (
 	"fmt"
 	"math/rand"
 	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-
 	"juego-pollo/models"
+	"juego-pollo/utils"
 )
 const (
     gameWidth     = 300
@@ -26,6 +27,7 @@ type GameScene struct {
     obstacle    *models.Obstacle
     score       int
     scoreLabel  *widget.Label
+	statusLabel *widget.Label
     gameObjects fyne.CanvasObject
 }
 
@@ -36,15 +38,21 @@ func NewGameScene() *GameScene {
         player: models.NewPlayer(),
         obstacle: models.NewObstacle(),
         scoreLabel: widget.NewLabel("Score: 0"),
+		statusLabel: widget.NewLabel("vas bien"),
     }
+	gameScene.statusLabel.Move(fyne.NewPos(50,460))
     gameScene.window.Resize(fyne.NewSize(gameWidth, gameHeight))
     gameScene.player.MoveTo(gameWidth/2-playerSize/2, gameHeight-playerSize-10)
-    gameScene.gameObjects = container.NewWithoutLayout(gameScene.player.GetRectangle(), gameScene.obstacle.GetRectangle(), gameScene.scoreLabel)
+    gameScene.gameObjects = container.NewWithoutLayout(gameScene.player.GetRectangle(), gameScene.obstacle.GetRectangle(), gameScene.scoreLabel, gameScene.statusLabel)
     gameScene.window.SetContent(gameScene.gameObjects)
     return gameScene
 }
 
+
+
+
 func (gs *GameScene) Start() {
+
     go func() {
         for {
             select {
@@ -54,6 +62,7 @@ func (gs *GameScene) Start() {
                     gs.player.MoveTo(gs.player.GetRectangle().Position().X, gameHeight-playerSize-10)
                     gs.score++
                     gs.scoreLabel.SetText(fmt.Sprintf("Score: %d", gs.score))
+					
                 }
             }
         }
@@ -62,29 +71,32 @@ func (gs *GameScene) Start() {
     go func() {
         for {
             select {
-            case <-time.After(time.Millisecond * 250):
-				
+            case <-time.After(time.Millisecond * 300):
                 gs.obstacle.MoveTo(float32(rand.Intn(gameWidth-obstacleSize)), 0)
 				
+				if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
+			
+			gs.statusLabel.SetText("Game Over!")
+			
+			return
             }
         }
-    }()
+    }}()
 
-   /* go func() {
-        for {
-            select {
-            case <-time.After(time.Millisecond * 100):
-                if gs.player.GetRectangle().Position().Intersects(gs.obstacle.GetRectangle().Position()) {
-                    gs.GameOver()
-                    return
-                }
-            }
-        }
-    }()*/
+	go func() {
+		if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
+			
+			gs.statusLabel.SetText("Game Over!")
+			
+			return
+	
+		}
+			
+		}()
+
+	
+	
+
 
     gs.window.ShowAndRun()
-}
-
-func (gs *GameScene) GameOver() {
-    // Implementar lógica para mostrar la pantalla de Game Over
 }
