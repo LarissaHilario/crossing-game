@@ -3,7 +3,7 @@ package scenes
 
 import (
 	"fmt"
-	"math/rand"
+
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -14,10 +14,10 @@ import (
 	"juego-pollo/utils"
 )
 const (
-    gameWidth     = 300
+    gameWidth     = 900
     gameHeight    = 500
     playerSize    = 50
-    obstacleSize  = 70
+    obstacleSize  = 50
 )
 
 type GameScene struct {
@@ -71,31 +71,27 @@ func (gs *GameScene) Start() {
     go func() {
         for {
             select {
-            case <-time.After(time.Millisecond * 300):
-                gs.obstacle.MoveTo(float32(rand.Intn(gameWidth-obstacleSize)), 0)
+            case <-time.After(time.Millisecond * 100):
+		
+                gs.obstacle.MoveTo(gs.obstacle.GetRectangle().Position().X+10, gs.obstacle.GetRectangle().Position().Y)
+			  }
 				
 				if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
 			
-			gs.statusLabel.SetText("Game Over!")
+				gs.statusLabel.SetText("Game Over!")
 			
 			return
             }
         }
-    }}()
+    }()
 
 	go func() {
 		if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
-			
 			gs.statusLabel.SetText("Game Over!")
-			
 			return
-	
 		}
 			
 		}()
-
-	
-	
 
 
     gs.window.ShowAndRun()

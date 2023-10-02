@@ -6,7 +6,7 @@ import (
 )
 
 const (
-    gameWidth     = 300
+    gameWidth     = 900
     gameHeight    = 500
     playerSize    = 50
     obstacleSize  = 70
