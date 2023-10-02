@@ -15,12 +15,12 @@ type GameOverScene struct {
 func NewGameOverScene() *GameOverScene {
     return &GameOverScene{
         app:    app.New(),
-        window: app.New().NewWindow("Game Over"),
+        window: app.New().NewWindow("Juego terminado"),
     }
 }
 
 func (gos *GameOverScene) Show() {
-    gameOverLabel := widget.NewLabel("Game Over")
+    gameOverLabel := widget.NewLabel("Juego terminado")
     gos.window.SetContent(container.NewVBox(gameOverLabel))
     gos.window.Show()
 }

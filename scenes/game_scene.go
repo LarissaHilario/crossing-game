@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"juego-pollo/models"
 	"juego-pollo/utils"
-
 	"time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -25,7 +23,7 @@ type GameScene struct {
 	window      fyne.Window
 	player      *models.Player
 	obstacle    *models.Obstacle
-	score       int
+	score       int 
 	scoreLabel  *widget.Label
 	statusLabel *widget.Label
 	gameObjects fyne.CanvasObject
@@ -41,7 +39,8 @@ func NewGameScene() *GameScene {
 		window:      app.New().NewWindow("Crossy Road"),
 		player:      models.NewPlayer(),
 		obstacle:    models.NewObstacle(),
-		scoreLabel:  widget.NewLabel("Score: 0"),
+		score:       3,
+		scoreLabel:  widget.NewLabel("Vidas: 3 "),
 		statusLabel: widget.NewLabel("vas bien"),
 
 		moveUp:    make(chan struct{}),
@@ -86,7 +85,7 @@ func movePlayer(gs *GameScene) {
 				gs.player.MoveTo(gameWidth-playerSize, gs.player.GetRectangle().Position().Y)
 			}
 		}
-		gs.scoreLabel.SetText(fmt.Sprintf("Score: %d", gs.score))
+		
 
 	}
 }
@@ -105,18 +104,23 @@ func moveObstacle(gs *GameScene) {
 
 func checkCollision(gs *GameScene) {
 	for {
-		select {
-		case <-time.After(time.Millisecond * 100):
-			if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
-				gs.statusLabel.SetText("¡Ay te aplastaron!")
-				return
-			} else if !utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) && gs.obstacle.GetRectangle().Position().X < gameWidth {
-				gs.score++
-				gs.scoreLabel.SetText(fmt.Sprintf("Score: %d", gs.score))
+		if utils.ImageOverlaps(gs.player.GetRectangle(), gs.obstacle.GetRectangle()) {
+			gs.statusLabel.SetText("¡Ay te aplastaron!")
+			gs.score--
+			if gs.score == 0 {
+				gameOverScene := NewGameOverScene()
+				gameOverScene.Show()
 			}
+			gs.scoreLabel.SetText(fmt.Sprintf("Vidas: %d", gs.score))
+			gs.player.MoveTo(gs.player.GetRectangle().Position().X, gameHeight-playerSize)
+			
 		}
+		time.Sleep(time.Millisecond * 100)
+		
 	}
 }
+
+
 
 func (gs *GameScene) Start() {
 
