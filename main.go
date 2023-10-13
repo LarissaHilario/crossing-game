@@ -2,17 +2,19 @@
 package main
 
 import (
-    "juego-pollo/scenes"  
+	"juego-pollo/scenes"
 )
 
 const (
-    gameWidth     = 300
-    gameHeight    = 500
+    gameWidth     = 500
+    gameHeight    = 700
     playerSize    = 50
     obstacleSize  = 70
+    
 )
 
 func main() {
-    gameScene := scenes.NewGameScene()
+	gameScene := scenes.NewGameScene()
     gameScene.Start()
+
 }

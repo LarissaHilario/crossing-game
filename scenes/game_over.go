@@ -8,13 +8,12 @@ import (
 )
 
 type GameOverScene struct {
-    app    fyne.App
     window fyne.Window
 }
 
 func NewGameOverScene() *GameOverScene {
     return &GameOverScene{
-        app:    app.New(),
+     
         window: app.New().NewWindow("Juego terminado"),
     }
 }

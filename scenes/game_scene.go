@@ -7,7 +7,9 @@ import (
 	"time"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -42,23 +44,35 @@ func NewGameScene() *GameScene {
 		score:       3,
 		scoreLabel:  widget.NewLabel("Vidas: 3 "),
 		statusLabel: widget.NewLabel("vas bien"),
-
 		moveUp:    make(chan struct{}),
 		moveDown:  make(chan struct{}),
 		moveLeft:  make(chan struct{}),
 		moveRight: make(chan struct{}),
 	}
-
-	gameScene.statusLabel.Move(fyne.NewPos(50, 460))
+	gameScene.statusLabel.Move(fyne.NewPos(160, 0))
+	background := canvas.NewImageFromURI(storage.NewFileURI("./assets/paisaje.png"))
+	background.Resize(fyne.NewSize(300, 500))
+	background.Move(fyne.NewPos(0,0))
+	pasto:= canvas.NewImageFromURI(storage.NewFileURI("./assets/pasto.png"))
+	pasto.Resize(fyne.NewSize(300, 210))
+	pasto.Move(fyne.NewPos(0,390))
 
 	gameScene.window.Resize(fyne.NewSize(gameWidth, gameHeight))
 	gameScene.player.MoveTo(gameWidth/2-playerSize/2, gameHeight-playerSize-10)
-	gameScene.obstacle.MoveTo(gameWidth-obstacleSize+10, gameHeight/2-obstacleSize/2+60)
-	gameScene.gameObjects = container.NewWithoutLayout(gameScene.player.GetRectangle(), gameScene.obstacle.GetRectangle(), gameScene.scoreLabel, gameScene.statusLabel)
+	gameScene.obstacle.MoveTo(gameWidth-obstacleSize+10, gameHeight/2-obstacleSize/2+130)
+	gameScene.gameObjects = container.NewWithoutLayout(background,pasto,gameScene.player.GetRectangle(), gameScene.obstacle.GetRectangle(), gameScene.scoreLabel, gameScene.statusLabel)
 	gameScene.window.SetContent(gameScene.gameObjects)
 
+	
+	
+    
 	return gameScene
 }
+
+	
+
+	
+
 
 func movePlayer(gs *GameScene) {
 	for {
@@ -93,7 +107,7 @@ func movePlayer(gs *GameScene) {
 func moveObstacle(gs *GameScene) {
 	for {
 		select {
-		case <-time.After(time.Millisecond * 100):
+		case <-time.After(time.Millisecond * 20):
 			gs.obstacle.MoveTo(gs.obstacle.GetRectangle().Position().X+5, gs.obstacle.GetRectangle().Position().Y)
 			if gs.obstacle.GetRectangle().Position().X > gameWidth {
 				gs.obstacle.MoveTo(-obstacleSize, gs.obstacle.GetRectangle().Position().Y)
@@ -108,8 +122,9 @@ func checkCollision(gs *GameScene) {
 			gs.statusLabel.SetText("¡Ay te aplastaron!")
 			gs.score--
 			if gs.score == 0 {
-				gameOverScene := NewGameOverScene()
-				gameOverScene.Show()
+				gs.statusLabel.SetText("Juego terminado")
+				gs.window.Close()
+				
 			}
 			gs.scoreLabel.SetText(fmt.Sprintf("Vidas: %d", gs.score))
 			gs.player.MoveTo(gs.player.GetRectangle().Position().X, gameHeight-playerSize)
@@ -124,10 +139,6 @@ func checkCollision(gs *GameScene) {
 
 func (gs *GameScene) Start() {
 
-	go movePlayer(gs)
-	go moveObstacle(gs)
-	go checkCollision(gs)
-
 	moveUpButton := widget.NewButton("Arriba", func() {
 		gs.moveUp <- struct{}{}
 	})
@@ -140,6 +151,7 @@ func (gs *GameScene) Start() {
 	moveRightButton := widget.NewButton("Derecha", func() {
 		gs.moveRight <- struct{}{}
 	})
+	
 	// Mueve los botones a sus posiciones finales
 	moveUpButton.Move(fyne.NewPos(10, 10))
 	moveDownButton.Move(fyne.NewPos(10, 30))
@@ -152,9 +164,10 @@ func (gs *GameScene) Start() {
 	moveLeftButton.Resize(fyne.NewSize(50, 50))
 	moveRightButton.Resize(fyne.NewSize(50, 50))
 
-	// Agrega los botones a la ventana
-	gs.window.SetContent(container.NewVBox(gs.gameObjects, moveUpButton, moveDownButton, moveLeftButton, moveRightButton))
-
+	gs.window.SetContent(container.NewVBox(gs.gameObjects, moveUpButton, moveDownButton, moveLeftButton, moveRightButton, ))
+	go movePlayer(gs)
+	go moveObstacle(gs)
+	go checkCollision(gs)
 	// Muestra la ventana
 	gs.window.ShowAndRun()
 
